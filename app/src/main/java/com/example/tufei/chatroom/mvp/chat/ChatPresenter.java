@@ -81,26 +81,27 @@ public class ChatPresenter implements ChatContract.Presenter {
             @Override
             public void onRecognized(String resultText) {
                 //通知界面更新
-                if (!TextUtils.isEmpty(resultText)) {
-                    Log.v(TAG, "语音识别结果:" + resultText);
-                    ChatData askData = new ChatData(resultText, true);
+                if (!TextUtils.isEmpty(recognizeText)) {
+                    Log.v(TAG, "语音识别结果:" + recognizeText);
+                    ChatData askData = new ChatData(recognizeText, true);
                     datas.add(askData);
                     mAdapter.notifyDataSetChanged();
 
                     //开始语义理解
-                    startTextUnderStand(resultText);
+                    startTextUnderStand(recognizeText);
 
                     //获取理解结果
                     mModel.getUnderStandText(new ChatModel.UnderstandCallback() {
                         @Override
-                        public void onUnderstanded(String resultText) {
-                            if (!TextUtils.isEmpty(resultText)) {
-                                Log.v(TAG, "语义理解结果:" + resultText);
-                                ChatData answerData = new ChatData(resultText, false);
-                                datas.add(answerData);
-                                mAdapter.notifyDataSetChanged();
+                        public void onUnderstanded(String understandText) {
+                                if (!TextUtils.isEmpty(understandText)) {
+                                    Log.v(TAG, "语义理解结果:" + understandText);
+                                    ChatData answerData = new ChatData(understandText, false);
+                                    datas.add(answerData);
+                                    mAdapter.notifyDataSetChanged();
 
-
+                                    //开始语音合成
+                                    startSpeechSpark(understandText);
                             }
                         }
                     });
@@ -114,6 +115,9 @@ public class ChatPresenter implements ChatContract.Presenter {
 
 
 
+    }
+
+    private void startSpeechSpark(String text) {
     }
 
     private void startTextUnderStand(String text) {
