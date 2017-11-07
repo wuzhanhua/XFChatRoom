@@ -5,28 +5,35 @@ package com.example.tufei.chatroom.bean;
  */
 
 public class ChatData {
-    private String ask;
-    private String answer;
+    private String text;
 
-    public ChatData(String ask, String answer) {
-        this.ask = ask;
-        this.answer = answer;
+    public ChatData(String text, boolean isAsk) {
+        this.text = text;
+        this.isAsk = isAsk;
     }
 
-    public String getAsk() {
-        return ask;
+    private boolean isAsk;
+
+    public String getText() {
+        return text;
     }
 
-    public void setAsk(String ask) {
-        this.ask = ask;
+    public void setText(String text) {
+        this.text = text;
     }
 
-    public String getAnswer() {
-        return answer;
+    public boolean isAsk() {
+        return isAsk;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public void setAsk(boolean ask) {
+        isAsk = ask;
     }
 
+    @Override
+    public String toString() {
+        return "ChatData{" +
+                "text='" + text + '\'' +
+                '}';
+    }
 }

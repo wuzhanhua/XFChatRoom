@@ -1,112 +1,120 @@
 package com.example.tufei.chatroom.mvp.chat;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.example.tufei.chatroom.R;
-import com.example.tufei.chatroom.base.BaseView;
-import com.example.tufei.chatroom.bean.ChatData;
+import com.example.tufei.chatroom.adapter.ChatAdapter;
+import com.example.tufei.chatroom.base.BaseActivity;
+import com.example.tufei.chatroom.di.Injection;
+import com.example.tufei.chatroom.utils.ToastUtil;
 import com.iflytek.cloud.ui.RecognizerDialog;
-
-import java.util.ArrayList;
+import com.iflytek.cloud.ui.RecognizerDialogListener;
 
 /**
  * @author wzh
  * @date 2017/11/4
  */
-public class ChatActivity extends Activity implements ChatContract.View{
-
-    // 语音听写
-    private RecognizerDialog mIatDialog;
+public class ChatActivity extends BaseActivity implements ChatContract.View, View.OnClickListener {
 
     private ChatContract.Presenter mChatPresenter;
 
     private RecyclerView rlChatroom;
-    private MyAdapter mAdapter;
+
+    // 语音听写
+    private RecognizerDialog mIatDialog;
+    private RecognizerDialogListener mRecognizerDialogListener;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
 
         initView();
+        initData();
     }
 
     private void initView() {
-        rlChatroom = (RecyclerView) findViewById(R.id.rl_chatroom);
-        Button btnTalk = (Button) findViewById(R.id.btn_talk);
+        rlChatroom = findViewById(R.id.rl_chatroom);
+        Button btnTalk = findViewById(R.id.btn_talk);
+        btnTalk.setOnClickListener(this);
 
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rlChatroom.setLayoutManager(mLayoutManager);
-        rlChatroom.setAdapter(mAdapter);
+
+
     }
+
 
     private void initData() {
 
-        mChatPresenter = new ChatPresenter(this);
+        mChatPresenter = new ChatPresenter(this, Injection.provideChatModel());
 
-        mAdapter = new MyAdapter(getData());
-    }
+        // 初始化听写Dialog，如果只使用有UI听写功能，无需创建SpeechRecognizer
+        // 使用UI听写功能，请根据sdk文件目录下的notice.txt,放置布局文件和图片资源
+        mIatDialog = new RecognizerDialog(this, null);
 
-    private ArrayList<ChatData> getData() {
-        ArrayList<ChatData> list=new ArrayList<ChatData>();
-        for (int i = 0; i < 10; i++) {
-            ChatData data=new ChatData("提问"+i,"回答"+i);
-            list.add(data);
-        }
-        return list;
     }
 
 
-    /**
-     *聊天窗口recyclerview数据适配器
-     */
-    class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+//    private ArrayList<ChatData> getData() {
+//        ArrayList<ChatData> list = new ArrayList<ChatData>();
+//        for (int i = 0; i < 10; i++) {
+//            ChatData data = new ChatData("提问" + i, "回答" + i);
+//            list.add(data);
+//        }
+//        return list;
+//    }
 
-        private ArrayList<ChatData> data;
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
 
-        public MyAdapter(ArrayList<ChatData> data) {
-            this.data=data;
-        }
+            //语音识别
+            case R.id.btn_talk:
 
-        @Override
-        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = View.inflate(ChatActivity.this, R.layout.item_rl_chatroom, null);
-            ViewHolder holder = new ViewHolder(itemView);
-            return holder;
-        }
+                Log.v("ChatPresenter","语音识别开始");
+                //开始语音识别
+                mChatPresenter.startspeechrecognize();
 
-        @Override
-        public void onBindViewHolder(MyAdapter.ViewHolder holder, int position) {
+                break;
 
-            holder.tvAsk.setText(data.get(position).getAsk());
-            holder.tvAnswer.setText(data.get(position).getAnswer());
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-
-            TextView tvAsk;
-            TextView tvAnswer;
-            public ViewHolder(View itemView) {
-                super(itemView);
-                tvAsk = itemView.findViewById(R.id.tv_ask);
-                tvAnswer = itemView.findViewById(R.id.tv_answer);
-            }
+            default:
+                break;
         }
     }
 
+    @Override
+    public void showToast(String text) {
+        ToastUtil.showToast(text);
+    }
+
+    @Override
+    public void startRecognize() {
+        mIatDialog.show();
+    }
+
+    @Override
+    public void setAdapter(ChatAdapter adapter) {
+        rlChatroom.setAdapter(adapter);
+    }
+
+    @Override
+    public void setRecognizerDialogListener(RecognizerDialogListener listener) {
+        mIatDialog.setListener(listener);
+    }
 
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mChatPresenter.detachView();
+    }
 }
