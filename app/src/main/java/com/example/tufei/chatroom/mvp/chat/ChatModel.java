@@ -5,13 +5,17 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.tufei.chatroom.App;
 import com.example.tufei.chatroom.bean.RecognizerData;
 import com.example.tufei.chatroom.bean.UnderStanderData;
 import com.example.tufei.chatroom.utils.ToastUtil;
 import com.google.gson.Gson;
 import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
+import com.iflytek.cloud.TextUnderstander;
 import com.iflytek.cloud.TextUnderstanderListener;
 import com.iflytek.cloud.UnderstanderResult;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
@@ -30,12 +34,27 @@ public class ChatModel {
     private RecognizeCallback mRecognizeCallback;
     private UnderstandCallback mUnderstandCallback;
 
+    // 语音合成对象
+    private SpeechSynthesizer mTts;
+
+    // 语义理解对象（文本到语义）。
+    private TextUnderstander  mTextUnderstander;
+
     private static ChatModel INSTANCE;
+
+    public ChatModel() {
+        // 初始化语音合成对象
+        mTts = SpeechSynthesizer.createSynthesizer(App.getApplication(), null);
+
+        //初始化语义理解对象
+        mTextUnderstander = TextUnderstander.createTextUnderstander(App.getApplication(),null );
+    }
 
     public static ChatModel getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new ChatModel();
         }
+
         return INSTANCE;
     }
 
@@ -44,8 +63,33 @@ public class ChatModel {
 
     }
 
-    public void getUnderStandText(UnderstandCallback callback) {
+    public void getUnderStandText(String text,UnderstandCallback callback) {
         mUnderstandCallback=callback;
+
+        int ret = 0;// 函数调用返回值
+        if (TextUtils.isEmpty(text)) {
+            text="我听不见听不见听不见，请再说一遍";
+        }else{
+            if(mTextUnderstander.isUnderstanding()){
+                mTextUnderstander.cancel();
+//                mView.showToast("取消");
+            }else {
+                // 设置语义情景
+                mTextUnderstander.setParameter(SpeechConstant.SCENE, "main");
+                //开始
+                ret = mTextUnderstander.understandText(text, mTextUnderstanderListener);
+                if(ret != 0)
+                {
+//                    mView.showToast("语义理解失败,错误码:"+ ret);
+                }
+            }
+        }
+    }
+
+    public void startSpeechSpeak(String text) {
+        mTts.startSpeaking(text,mTtsListener);
+
+
     }
 
 
@@ -53,13 +97,7 @@ public class ChatModel {
         return mRecognizerDialogListener;
     }
 
-    public TextUnderstanderListener getTextUnderstanderListener() {
-        return mTextUnderstanderListener;
-    }
 
-    public SynthesizerListener getSynthesizerListener() {
-        return mTtsListener;
-    }
 
 
     /**
