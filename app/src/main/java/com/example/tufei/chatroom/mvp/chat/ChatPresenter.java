@@ -72,14 +72,16 @@ public class ChatPresenter implements ChatContract.Presenter {
     @Override
     public void startspeechrecognize() {
 
-        //设置监听接口
+        //设置语音识别监听接口
         mView.setRecognizerDialogListener(mModel.getRecognizeListener());
+
         //开始语音识别
         mView.startRecognize();
+
         //获取识别结果
         mModel.getRecognizeText(new ChatModel.RecognizeCallback() {
             @Override
-            public void onRecognized(String resultText) {
+            public void onRecognized(String recognizeText) {
                 //通知界面更新
                 if (!TextUtils.isEmpty(recognizeText)) {
                     Log.v(TAG, "语音识别结果:" + recognizeText);
@@ -118,12 +120,14 @@ public class ChatPresenter implements ChatContract.Presenter {
     }
 
     private void startSpeechSpark(String text) {
+        mTts.startSpeaking(text,mModel.getSynthesizerListener());
     }
 
     private void startTextUnderStand(String text) {
+
         int ret = 0;// 函数调用返回值
         if (TextUtils.isEmpty(text)) {
-            text="我听不见听不见听不见，亲请再说一遍";
+            text="我听不见听不见听不见，请再说一遍";
         }else{
             if(mTextUnderstander.isUnderstanding()){
                 mTextUnderstander.cancel();

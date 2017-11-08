@@ -1,7 +1,9 @@
 package com.example.tufei.chatroom.mvp.chat;
 
 
+import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.tufei.chatroom.bean.RecognizerData;
 import com.example.tufei.chatroom.bean.UnderStanderData;
@@ -9,6 +11,7 @@ import com.example.tufei.chatroom.utils.ToastUtil;
 import com.google.gson.Gson;
 import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SynthesizerListener;
 import com.iflytek.cloud.TextUnderstanderListener;
 import com.iflytek.cloud.UnderstanderResult;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
@@ -54,6 +57,10 @@ public class ChatModel {
         return mTextUnderstanderListener;
     }
 
+    public SynthesizerListener getSynthesizerListener() {
+        return mTtsListener;
+    }
+
 
     /**
      * 语音听写回调
@@ -65,11 +72,9 @@ public class ChatModel {
             if (!isLast) {
                 if (!TextUtils.isEmpty(recognizerResult.getResultString())) {
 
-                    parseResult(recognizerResult.getResultString());
+                    String result = parseRecognizeResult(recognizerResult.getResultString());
                     //解析完成，调用回调方法
-                    mRecognizeCallback.onRecognized(recognizeText);
-                }else{
-                    recognizeText="";
+                    mRecognizeCallback.onRecognized(result);
                 }
             }
         }
@@ -80,7 +85,7 @@ public class ChatModel {
         }
     };
 
-    private void parseResult(String json) {
+    private String parseRecognizeResult(String json) {
         String speechText;
         StringBuffer str = new StringBuffer();
         Gson gson = new Gson();
@@ -91,6 +96,9 @@ public class ChatModel {
         }
 
         recognizeText = str.toString();
+
+        Log.v("ChatPresenter", "识别结果：" + recognizeText);
+        return recognizeText;
 
     }
 
@@ -106,7 +114,7 @@ public class ChatModel {
         @Override
         public void onResult(final UnderstanderResult result) {
             if (null != result) {
-                parseUnderStanderResult(result.getResultString());
+                parseUnderstanderResult(result.getResultString());
                 mUnderstandCallback.onUnderstanded(understandText);
             }
         }
@@ -120,7 +128,7 @@ public class ChatModel {
 
     };
 
-    private void parseUnderStanderResult(String json) {
+    private void parseUnderstanderResult(String json) {
 
         if (!TextUtils.isEmpty(json)) {
             Gson gson = new Gson();
@@ -136,5 +144,52 @@ public class ChatModel {
     interface UnderstandCallback{
         void onUnderstanded(String resultText);
     }
+
+    /**
+     * 语音合成监听
+     */
+    private SynthesizerListener mTtsListener = new SynthesizerListener() {
+
+
+        @Override
+        public void onSpeakBegin() {
+
+        }
+
+        @Override
+        public void onBufferProgress(int percent, int beginPos, int endPos,
+                                     String info) {
+
+        }
+
+        @Override
+        public void onSpeakPaused() {
+
+        }
+
+        @Override
+        public void onSpeakResumed() {
+
+        }
+
+        @Override
+        public void onSpeakProgress(int percent, int beginPos, int endPo) {
+
+        }
+
+        @Override
+        public void onCompleted(SpeechError speechError) {
+            if (speechError == null) {
+                ToastUtil.showToast("播放完成");
+            } else if (speechError != null) {
+                ToastUtil.showToast(speechError.getPlainDescription(true));
+            }
+        }
+
+        @Override
+        public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+
+        }
+    };
 
 }
