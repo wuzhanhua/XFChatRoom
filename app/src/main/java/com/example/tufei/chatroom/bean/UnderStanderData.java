@@ -22,6 +22,7 @@ public class UnderStanderData {
      */
 
     private AnswerBean answer;
+    private int rc;
 
     public static class AnswerBean {
         /**
@@ -41,5 +42,13 @@ public class UnderStanderData {
 
     public AnswerBean getAnswer() {
         return answer;
+    }
+
+    public int getRc() {
+        return rc;
+    }
+
+    public void setRc(int rc) {
+        this.rc = rc;
     }
 }

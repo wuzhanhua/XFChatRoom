@@ -54,13 +54,8 @@ public class ChatPresenter implements ChatContract.Presenter {
 
 
     @Override
-    public void startspeechrecognize() {
-
-        //设置语音识别监听接口
-        mView.setRecognizerDialogListener(mModel.getRecognizeListener());
-
-        //开始语音识别
-        mView.startRecognize();
+    public void start() {
+        startspeechrecognize();
 
         //获取识别结果
         mModel.getRecognizeText(new ChatModel.RecognizeCallback() {
@@ -81,6 +76,18 @@ public class ChatPresenter implements ChatContract.Presenter {
         });
     }
 
+    @Override
+    public void startspeechrecognize() {
+
+        //设置语音识别监听接口,把监听对象传递给v层，由v层开始调用
+        mView.setRecognizerDialogListener(mModel.getRecognizeListener());
+
+        //开始语音识别
+        mView.startRecognize();
+
+
+    }
+
     private void startSpeechSpark(String text) {
         mModel.startSpeechSpeak(text);
     }
@@ -90,15 +97,24 @@ public class ChatPresenter implements ChatContract.Presenter {
         mModel.getUnderStandText(text, new ChatModel.UnderstandCallback() {
             @Override
             public void onUnderstanded(String understandText) {
-                if (!TextUtils.isEmpty(understandText)) {
-                    Log.v(TAG, "语义理解结果:" + understandText);
-                    ChatData answerData = new ChatData(understandText, false);
-                    datas.add(answerData);
-                    mAdapter.notifyDataSetChanged();
 
-                    //开始语音合成
-                    startSpeechSpark(understandText);
+                String text="";
+                Log.v(TAG, understandText);
+                if (!TextUtils.isEmpty(understandText)) {
+                    text=understandText;
+                    Log.v(TAG, "语义理解结果:" + text);
+
+                }else {
+                    text="我无语了......";
                 }
+
+
+                ChatData answerData = new ChatData(text, false);
+                datas.add(answerData);
+                mAdapter.notifyDataSetChanged();
+
+                //开始语音合成
+                startSpeechSpark(text);
             }
 
         });

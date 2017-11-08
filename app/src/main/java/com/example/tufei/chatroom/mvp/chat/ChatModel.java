@@ -28,6 +28,7 @@ import java.util.List;
  */
 public class ChatModel {
 
+    public static final String TAG = "ChatModel";
     private String recognizeText;
     private String understandText;
 
@@ -68,7 +69,7 @@ public class ChatModel {
 
         int ret = 0;// 函数调用返回值
         if (TextUtils.isEmpty(text)) {
-            text="我听不见听不见听不见，请再说一遍";
+            text="抱歉，你说神马？？？";
         }else{
             if(mTextUnderstander.isUnderstanding()){
                 mTextUnderstander.cancel();
@@ -81,6 +82,7 @@ public class ChatModel {
                 if(ret != 0)
                 {
 //                    mView.showToast("语义理解失败,错误码:"+ ret);
+//                    Log.v(TAG, "语义理解失败");
                 }
             }
         }
@@ -101,7 +103,7 @@ public class ChatModel {
 
 
     /**
-     * 语音听写回调
+     * 语音听写监听器
      */
     private RecognizerDialogListener mRecognizerDialogListener = new RecognizerDialogListener() {
         @Override
@@ -144,7 +146,7 @@ public class ChatModel {
 
 
     /**
-     * 文本语义监听
+     * 语义理解监听器
      */
     public static final String errorTip = "请确认是否有在 aiui.xfyun.cn 配置语义。（另外，已开通语义，但从1115（含1115）以前的SDK更新到1116以上版本SDK后，语义需要重新到 aiui.xfyun.cn 配置）";
     private TextUnderstanderListener mTextUnderstanderListener = new TextUnderstanderListener() {
@@ -161,17 +163,28 @@ public class ChatModel {
         public void onError(SpeechError speechError) {
             // 文本语义不能使用回调错误码14002，请确认您下载sdk时是否勾选语义场景和私有语义的发布
             // 请到 aiui.xfyun.cn 配置语义，从1115前的SDK更新到1116以上版本SDK后，语义需要重新到 aiui.xfyun.cn 配置
-            ToastUtil.showToast("onError Code：" + speechError.getErrorCode() + ", " + errorTip);
+//            ToastUtil.showToast("onError Code：" + speechError.getErrorCode() + ", " + errorTip);
+//            Log.v(TAG, "语义理解失败");
+//            mUnderstandCallback.onUnderstanded("");
         }
+
+
 
     };
 
     private void parseUnderstanderResult(String json) {
 
         if (!TextUtils.isEmpty(json)) {
+            Log.v(TAG, "语义理解json:" + json);
             Gson gson = new Gson();
             UnderStanderData data = gson.fromJson(json, UnderStanderData.class);
-            understandText=data.getAnswer().getText();
+
+            //rc不等于0，表示语义理解失败，返回空字符串
+            if (data.getRc() != 0) {
+                understandText = "";
+            } else {
+                understandText=data.getAnswer().getText();
+            }
         }
     }
 

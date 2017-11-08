@@ -82,7 +82,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Vie
 
                 Log.v("ChatPresenter","语音识别开始");
                 //开始语音识别
-                mChatPresenter.startspeechrecognize();
+                mChatPresenter.start();
 
                 break;
 
