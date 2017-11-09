@@ -39,10 +39,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             holder.tvAsk.setText(data.getText());
             holder.tvAsk.setVisibility(View.VISIBLE);
             holder.tvAnswer.setVisibility(View.GONE);
+
+            //设置点击事件
+            holder.tvAsk.setTag(position);
+            holder.tvAsk.setOnClickListener(holder);
         } else {
             holder.tvAnswer.setText(data.getText());
             holder.tvAsk.setVisibility(View.GONE);
             holder.tvAnswer.setVisibility(View.VISIBLE);
+
+            //设置点击事件
+            holder.tvAnswer.setTag(position);
+            holder.tvAnswer.setOnClickListener(holder);
         }
     }
 
@@ -53,7 +61,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     }
 
 
-    class ChatViewHolder extends RecyclerView.ViewHolder {
+    class ChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tvAsk;
         TextView tvAnswer;
 
@@ -62,6 +70,23 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             tvAsk = itemView.findViewById(R.id.tv_ask);
             tvAnswer = itemView.findViewById(R.id.tv_answer);
         }
+
+        @Override
+        public void onClick(View v) {
+            int positon= (int) v.getTag();
+            mOnItemClickListener.onItemClick(v,positon);
+        }
     }
 
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mOnItemClickListener = listener;
+    }
+
+
+    OnItemClickListener mOnItemClickListener;
+
+    public interface OnItemClickListener {
+        void onItemClick(View v, int position);
+    }
 }

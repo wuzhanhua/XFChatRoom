@@ -101,6 +101,13 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Vie
     @Override
     public void setAdapter(ChatAdapter adapter) {
         rlChatroom.setAdapter(adapter);
+        adapter.setOnItemClickListener(new ChatAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+
+                mChatPresenter.startSpeechSpeak(position);
+            }
+        });
     }
 
     @Override

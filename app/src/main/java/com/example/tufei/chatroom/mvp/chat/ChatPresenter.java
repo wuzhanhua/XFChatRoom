@@ -81,13 +81,18 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     @Override
     public void startspeechrecognize() {
-
         //设置语音识别监听接口,把监听对象传递给v层，由v层开始调用
         //开始语音识别
         mView.startRecognize(mModel.getRecognizeListener());
     }
 
-    private void startSpeechSpark(String text) {
+    @Override
+    public void startSpeechSpeak(int position) {
+        ChatData data = datas.get(position);
+        startSpeechSpeak(data.getText());
+    }
+
+    private void startSpeechSpeak(String text) {
         mModel.startSpeechSpeak(text);
     }
 
@@ -97,19 +102,19 @@ public class ChatPresenter implements ChatContract.Presenter {
             @Override
             public void onUnderstanded(String understandText) {
 
-                String text="";
+                String text = "";
                 Log.v(TAG, understandText);
                 if (!TextUtils.isEmpty(understandText)) {
-                    text=understandText;
+                    text = understandText;
                     Log.v(TAG, "语义理解结果:" + text);
 
-                }else {
+                } else {
 
                     //生成一个随机回答
-                    String randomAnswer[] = {"我无语了......","听不懂","静静看你装逼","抱歉，我不知道"};
+                    String randomAnswer[] = {"我无语了......", "听不懂", "静静看你装逼", "抱歉，我不知道"};
                     Random random = new Random();
                     int i = random.nextInt() * randomAnswer.length;
-                    text=randomAnswer[i];
+                    text = randomAnswer[i];
                 }
 
 
@@ -118,7 +123,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                 mAdapter.notifyDataSetChanged();
 
                 //开始语音合成
-                startSpeechSpark(text);
+                startSpeechSpeak(text);
             }
 
         });

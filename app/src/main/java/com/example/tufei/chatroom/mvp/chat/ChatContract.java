@@ -21,5 +21,11 @@ public interface ChatContract {
 
 
         void startspeechrecognize();
+
+        /**
+         * 语音合成item位置的文本
+         * @param position item位置
+         */
+        void startSpeechSpeak(int position);
     }
 }

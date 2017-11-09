@@ -38,6 +38,9 @@ public class ChatModel {
     // 语音合成对象
     private SpeechSynthesizer mTts;
 
+    //是否正在语音合成
+    private boolean isSpeaking =false;
+
     // 语义理解对象（文本到语义）。
     private TextUnderstander  mTextUnderstander;
 
@@ -106,6 +109,12 @@ public class ChatModel {
     }
 
 
+    /**
+     * 停止语音合成
+     */
+    public void stopSpeechSpeak() {
+        mTts.stopSpeaking();
+    }
 
     public RecognizerDialogListener getRecognizeListener() {
         return mRecognizerDialogListener;
@@ -177,6 +186,8 @@ public class ChatModel {
 
         @Override
         public void onSpeakBegin() {
+            ToastUtil.showToast("播放开始");
+            isSpeaking=true;
         }
 
         @Override
@@ -199,6 +210,7 @@ public class ChatModel {
         @Override
         public void onCompleted(SpeechError speechError) {
             if (speechError == null) {
+                isSpeaking =false;
                 ToastUtil.showToast("播放完成");
             } else if (speechError != null) {
                 ToastUtil.showToast(speechError.getPlainDescription(true));
