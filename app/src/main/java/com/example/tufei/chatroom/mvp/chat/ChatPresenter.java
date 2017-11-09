@@ -83,10 +83,8 @@ public class ChatPresenter implements ChatContract.Presenter {
     public void startspeechrecognize() {
 
         //设置语音识别监听接口,把监听对象传递给v层，由v层开始调用
-        mView.setRecognizerDialogListener(mModel.getRecognizeListener());
-
         //开始语音识别
-        mView.startRecognize();
+        mView.startRecognize(mModel.getRecognizeListener());
     }
 
     private void startSpeechSpark(String text) {

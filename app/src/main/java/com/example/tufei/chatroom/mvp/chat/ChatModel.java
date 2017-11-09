@@ -43,27 +43,37 @@ public class ChatModel {
 
     private static ChatModel INSTANCE;
 
+
     public ChatModel() {
         // 初始化语音合成对象
         mTts = SpeechSynthesizer.createSynthesizer(App.getApplication(), null);
-
         //初始化语义理解对象
         mTextUnderstander = TextUnderstander.createTextUnderstander(App.getApplication(),null );
     }
+
 
     public static ChatModel getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new ChatModel();
         }
-
         return INSTANCE;
     }
 
+
+    /**
+     * 开始语音识别，并在回调中返回语义理解的结果
+     * @param callback 语音识别完成后的回调
+     */
     public void getRecognizeText(RecognizeCallback callback) {
         mRecognizeCallback=callback;
-
     }
 
+
+    /**
+     * 开始语义理解，并在回调中返回语义理解的结果
+     * @param text 需要执行语义理解的文本
+     * @param callback 语义理解完成后的回调
+     */
     public void getUnderStandText(String text,UnderstandCallback callback) {
         mUnderstandCallback=callback;
 
@@ -73,7 +83,6 @@ public class ChatModel {
         }else{
             if(mTextUnderstander.isUnderstanding()){
                 mTextUnderstander.cancel();
-//                mView.showToast("取消");
             }else {
                 // 设置语义情景
                 mTextUnderstander.setParameter(SpeechConstant.SCENE, "main");
@@ -88,11 +97,14 @@ public class ChatModel {
         }
     }
 
+    /**
+     * 开始语音合成
+     * @param text 需要合成的文本
+     */
     public void startSpeechSpeak(String text) {
         mTts.startSpeaking(text,mTtsListener);
-
-
     }
+
 
 
     public RecognizerDialogListener getRecognizeListener() {
@@ -100,6 +112,14 @@ public class ChatModel {
     }
 
 
+
+    interface RecognizeCallback {
+        void onRecognized(String resultText);
+    }
+
+    interface UnderstandCallback{
+        void onUnderstanded(String resultText);
+    }
 
 
     /**
@@ -125,26 +145,6 @@ public class ChatModel {
         }
     };
 
-    private String parseRecognizeResult(String json) {
-        String speechText;
-        StringBuffer str = new StringBuffer();
-        Gson gson = new Gson();
-        RecognizerData data = gson.fromJson(json, RecognizerData.class);
-        List<RecognizerData.WsBean> ws = data.getWs();
-        for (RecognizerData.WsBean w : ws) {
-            str.append(w.getCw().get(0).getW());
-        }
-
-        recognizeText = str.toString();
-
-        Log.v("ChatPresenter", "识别结果：" + recognizeText);
-        return recognizeText;
-
-    }
-
-
-
-
     /**
      * 语义理解监听器
      */
@@ -167,65 +167,33 @@ public class ChatModel {
 //            Log.v(TAG, "语义理解失败");
 //            mUnderstandCallback.onUnderstanded("");
         }
-
-
-
     };
 
-    private void parseUnderstanderResult(String json) {
-
-        if (!TextUtils.isEmpty(json)) {
-            Log.v(TAG, "语义理解json:" + json);
-            Gson gson = new Gson();
-            UnderStanderData data = gson.fromJson(json, UnderStanderData.class);
-
-            //rc不等于0，表示语义理解失败，返回空字符串
-            if (data.getRc() != 0) {
-                understandText = "";
-            } else {
-                understandText=data.getAnswer().getText();
-            }
-        }
-    }
-
-    interface RecognizeCallback {
-        void onRecognized(String resultText);
-    }
-
-    interface UnderstandCallback{
-        void onUnderstanded(String resultText);
-    }
 
     /**
-     * 语音合成监听
+     * 语音合成监听器
      */
     private SynthesizerListener mTtsListener = new SynthesizerListener() {
 
-
         @Override
         public void onSpeakBegin() {
-
         }
 
         @Override
         public void onBufferProgress(int percent, int beginPos, int endPos,
                                      String info) {
-
         }
 
         @Override
         public void onSpeakPaused() {
-
         }
 
         @Override
         public void onSpeakResumed() {
-
         }
 
         @Override
         public void onSpeakProgress(int percent, int beginPos, int endPo) {
-
         }
 
         @Override
@@ -242,5 +210,39 @@ public class ChatModel {
 
         }
     };
+
+
+    private String parseRecognizeResult(String json) {
+        String speechText;
+        StringBuffer str = new StringBuffer();
+        Gson gson = new Gson();
+        RecognizerData data = gson.fromJson(json, RecognizerData.class);
+        List<RecognizerData.WsBean> ws = data.getWs();
+        for (RecognizerData.WsBean w : ws) {
+            str.append(w.getCw().get(0).getW());
+        }
+
+        recognizeText = str.toString();
+
+        Log.v("ChatPresenter", "识别结果：" + recognizeText);
+        return recognizeText;
+    }
+
+
+    private void parseUnderstanderResult(String json) {
+
+        if (!TextUtils.isEmpty(json)) {
+            Log.v(TAG, "语义理解json:" + json);
+            Gson gson = new Gson();
+            UnderStanderData data = gson.fromJson(json, UnderStanderData.class);
+
+            //rc不等于0，表示语义理解失败，返回空字符串
+            if (data.getRc() != 0) {
+                understandText = "";
+            } else {
+                understandText=data.getAnswer().getText();
+            }
+        }
+    }
 
 }

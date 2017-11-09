@@ -96,10 +96,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Vie
         ToastUtil.showToast(text);
     }
 
-    @Override
-    public void startRecognize() {
-        mIatDialog.show();
-    }
+
 
     @Override
     public void setAdapter(ChatAdapter adapter) {
@@ -107,8 +104,9 @@ public class ChatActivity extends BaseActivity implements ChatContract.View, Vie
     }
 
     @Override
-    public void setRecognizerDialogListener(RecognizerDialogListener listener) {
+    public void startRecognize(RecognizerDialogListener listener) {
         mIatDialog.setListener(listener);
+        mIatDialog.show();
     }
 
 
