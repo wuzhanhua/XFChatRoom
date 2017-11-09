@@ -9,6 +9,7 @@ import com.example.tufei.chatroom.bean.ChatData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author wzh
@@ -55,6 +56,8 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     @Override
     public void start() {
+
+        //开始语音识别
         startspeechrecognize();
 
         //获取识别结果
@@ -84,8 +87,6 @@ public class ChatPresenter implements ChatContract.Presenter {
 
         //开始语音识别
         mView.startRecognize();
-
-
     }
 
     private void startSpeechSpark(String text) {
@@ -105,7 +106,12 @@ public class ChatPresenter implements ChatContract.Presenter {
                     Log.v(TAG, "语义理解结果:" + text);
 
                 }else {
-                    text="我无语了......";
+
+                    //生成一个随机回答
+                    String randomAnswer[] = {"我无语了......","听不懂","静静看你装逼","抱歉，我不知道"};
+                    Random random = new Random();
+                    int i = random.nextInt() * randomAnswer.length;
+                    text=randomAnswer[i];
                 }
 
 
